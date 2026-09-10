@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { UserBalance, Transaction } from '../types';
 import TransferForm from './TransferForm';
 import CryptoChat from './CryptoChat';
@@ -17,7 +17,7 @@ export default function Dashboard({ token, onLogout }: DashboardProps) {
 
   const fetchData = async () => {
     try {
-      const headers = { 'Authorization': `Bearer ${token}` };
+      const headers = { 'Authorization': `Bearer ${token}`, 'ngrok-skip-browser-warning': 'true' };
       const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
       const resBalance = await fetch(`${baseUrl}/accounts/balance`, { headers });

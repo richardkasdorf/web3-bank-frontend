@@ -33,7 +33,8 @@ export default function Login({ onLoginSuccess, onCreateAccountClick }: LoginPro
       const response = await fetch(`${apiUrl}/token`, {
         method: 'POST',
         headers: { 
-          'Content-Type': 'application/x-www-form-urlencoded' 
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'ngrok-skip-browser-warning': 'true'
         },
         body: new URLSearchParams({ 
           username: username.trim(), 
