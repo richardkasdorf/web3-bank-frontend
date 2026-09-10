@@ -12,13 +12,35 @@ export default function CryptoChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [inputMessage, setInputMessage] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const [isWaitingPassword, setIsWaitingPassword] = useState<boolean>(false);
+  const [pendingMessage, setPendingMessage] = useState<string>('');
+  const [passwordInput, setPasswordInput] = useState<string>('');
+
+  const handleSubmitForm = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault(); // Evita que a página recarregue ao apertar Enter
+
+    if (isWaitingPassword) {
+      // Se o chat estiver travado esperando a senha, envia o comando que ficou guardado
+      handleSendMessage(pendingMessage);
+    } else {
+      // Se for uma conversa normal, verifica se o usuário digitou algo
+      if (!inputMessage || !inputMessage.trim()) return;
+
+      // Envia o texto que está salvo no seu estado 'inputMessage'
+      handleSendMessage(inputMessage);
+
+      // Limpa a caixinha de texto do chat imediatamente após o envio
+      setInputMessage('');
+    }
+  };
   
   // Histórico de mensagens inicial com saudação do bot
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'init-msg',
       sender: 'bot',
-      text: 'Olá! Sou o seu assistente de IA - versão teste -. Digite uma das opções: - Saldo - Extrato - Sair',
+      text: 'Olá! Me chamo Satoshi e sou seu assessor de investimentos. Como posso lhe ajudar?',
       time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -33,48 +55,69 @@ export default function CryptoChat() {
   }, [messages, isProcessing]);
 
   // Função para enviar o texto para o backend 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputMessage.trim() || isProcessing) return;
+  const handleSendMessage = async (userText: string) => {
+    if (!userText.trim() && !passwordInput) return;
 
-    const userText = inputMessage;
-    setInputMessage('');
-
-    // 1. Adiciona a mensagem do usuário na tela
-    const newUserMessage: Message = {
-      id: Math.random().toString(),
-      sender: 'user',
-      text: userText,
-      time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-    };
-    setMessages(prev => [...prev, newUserMessage]);
     setIsProcessing(true);
+    
+    // Se for uma mensagem normal, adiciona o balão do usuário na tela
+    if (!isWaitingPassword) {
+      setMessages(prev => [...prev, {
+        id: Math.random().toString(),
+        sender: 'user',
+        text: userText,
+        time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+      }]);
+    }
 
     try {
-      // 2. Requisição para o Backend 
       const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const token = localStorage.getItem('token');
+      
+      // MONTAGEM DO CORPO DO CORREIO (JSON)
+      // Se o sistema estava esperando a senha, nós enviamos a mensagem antiga original 
+      // e preenchemos o campo 'password' que o FastAPI vai receber.
+      const requestBody = isWaitingPassword 
+        ? { message: pendingMessage, password: passwordInput }
+        : { message: userText };
+
       const response = await fetch(`${baseUrl}/api/chatbot-text`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userText }),
+        headers: { 
+          'Content-Type': 'application/json', 
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify(requestBody),
       });
-
+      
+      if (response.status === 401) throw new Error("Sessão expirada. Faça login novamente.");
       if (!response.ok) throw new Error("Erro de comunicação com o assistente.");
       
       const data = await response.json();
+      const botText = data.response || '';
+
+      // INTERCEPTAÇÃO DE SEGURANÇA:
+      // Se a IA respondeu pedindo a senha (checando o texto que configuramos no prompt do sistema)
+      if (botText.includes("por favor informe sua senha") || botText.includes("Senha requerida")) {
+        setIsWaitingPassword(true);      // Ativa o modo de senha na tela
+        setPendingMessage(userText);     // Salva o comando de transferência ("manda 10 usdc...") para usar depois
+      } else {
+        // Se for uma resposta comum ou sucesso da transferência, desativa o modo senha
+        setIsWaitingPassword(false);
+        setPendingMessage('');
+        setPasswordInput('');
+      }
       
-      // 3. Adiciona a resposta do ChatGPT no chatBot
-      const newBotMessage: Message = {
+      // Adiciona a resposta do Bot na tela
+      setMessages(prev => [...prev, {
         id: Math.random().toString(),
         sender: 'bot',
-        text: data.reply || 'Desculpe, não consegui processar sua resposta.',
+        text: botText,
         time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-      };
-      setMessages(prev => [...prev, newBotMessage]);
+      }]);
 
     } catch (error) {
-      console.error("Erro na requisição do Chatbot:", error);
-      // Feedback de erro mostrado no chat
+      console.error("Erro na requisição:", error);
       setMessages(prev => [...prev, {
         id: Math.random().toString(),
         sender: 'bot',
@@ -85,6 +128,9 @@ export default function CryptoChat() {
       setIsProcessing(false);
     }
   };
+
+
+  
 
   // Botão Flutuante (quando o chat está minimizado)
   if (!isOpen) {
@@ -142,7 +188,7 @@ export default function CryptoChat() {
       <div style={{ padding: '16px', borderBottom: '1px solid #1c1e24', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#090a0f' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{ width: '8px', height: '8px', backgroundColor: '#00ff66', borderRadius: '50%', boxShadow: '0 0 8px #00ff66' }} />
-          <span style={{ color: '#ffffff', fontWeight: '600', fontSize: '14px' }}>Assistente Circle</span>
+          <span style={{ color: '#ffffff', fontWeight: '600', fontSize: '14px' }}>Assistente virtual.</span>
         </div>
         <button onClick={() => setIsOpen(false)} style={{ background: 'none', border: 'none', color: '#a0aec0', fontSize: '18px', cursor: 'pointer', padding: '4px' }}>✕</button>
       </div>
@@ -192,48 +238,58 @@ export default function CryptoChat() {
         <div ref={messagesEndRef} />
       </div>
 
+
+
       {/* Caixa de Texto Inferior */}
-      <form onSubmit={handleSendMessage} style={{ padding: '16px', borderTop: '1px solid #1c1e24', backgroundColor: '#090a0f' }}>
-        <div style={{ display: 'flex', alignItems: 'center', backgroundColor: '#121418', border: '1px solid #22252e', borderRadius: '24px', padding: '4px 6px 4px 16px', gap: '8px' }}>
-          <input
-            type="text"
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-            placeholder={isProcessing ? "Aguardando resposta..." : "Escreva uma mensagem..."}
-            disabled={isProcessing}
-            style={{
-              flex: 1,
-              background: 'transparent',
-              border: 'none',
-              color: '#ffffff',
-              fontSize: '13px',
-              outline: 'none',
-              padding: '8px 0',
-            }}
-          />
-          <button
-            type="submit"
-            disabled={!inputMessage.trim() || isProcessing}
-            style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '50%',
-              backgroundColor: inputMessage.trim() && !isProcessing ? '#ffffff' : '#1c1e24',
-              color: inputMessage.trim() && !isProcessing ? '#000000' : '#4a5568',
-              border: 'none',
-              cursor: inputMessage.trim() && !isProcessing ? 'pointer' : 'default',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '12px',
-              fontWeight: 'bold',
-              transition: 'all 0.2s'
-            }}
-          >
-            ➔
-          </button>
-        </div>
+      <form onSubmit={handleSubmitForm} style={{ padding: '16px', borderTop: '1px solid #1c1e24', backgroundColor: '#090a0f' }}>
+        {isWaitingPassword ? (
+          // SE ESTIVER ESPERANDO A SENHA: Abre o input seguro de senha
+          <div style={{ display: 'flex', width: '100%', gap: '10px' }}>
+            <input 
+              type="password" 
+              placeholder="Digite sua senha Neon para confirmar..." 
+              value={passwordInput}
+              onChange={(e) => setPasswordInput(e.target.value)}
+              style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #ff4a4a', backgroundColor: '#13151a', color: '#fff' }}
+            />
+            <button 
+              type="submit"
+              style={{ backgroundColor: '#28a745', color: '#fff', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', border: 'none' }}
+            >
+              Confirmar Transferência
+            </button>
+            <button 
+              type="button" // IMPORTANTE: tipo 'button' para não disparar o onSubmit do formulário
+              onClick={() => {
+                setIsWaitingPassword(false);
+                setPasswordInput('');
+                setMessages(prev => [...prev, { id: Math.random().toString(), sender: 'bot', text: 'Operação cancelada.', time: new Date().toLocaleTimeString() }]);
+              }}
+              style={{ backgroundColor: '#dc3545', color: '#fff', padding: '10px 15px', borderRadius: '8px', cursor: 'pointer', border: 'none' }}
+            >
+              Cancelar
+            </button>
+          </div>
+        ) : (
+          // CASO CONTRÁRIO: Mostra o input de texto de conversa normal do seu Chat
+          <div style={{ display: 'flex', width: '100%', gap: '10px' }}>
+            <input 
+              type="text" 
+              placeholder="Converse com o assistente..." 
+              value={inputMessage} // CORRIGIDO: Agora bate com o seu useState do topo do arquivo
+              onChange={(e) => setInputMessage(e.target.value)} // CORRIGIDO: Agora usa o set correto
+              style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #1c1e24', backgroundColor: '#13151a', color: '#fff' }}
+            />
+            <button 
+              type="submit"
+              style={{ backgroundColor: '#0070f3', color: '#fff', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', border: 'none' }}
+            >
+              Enviar
+            </button>
+          </div>
+        )}
       </form>
+
     </div>
   );
 }
