@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Header from './Header';
 
 interface LoginProps {
   onLoginSuccess: (token: string) => void;
@@ -75,28 +76,9 @@ export default function Login({ onLoginSuccess, onCreateAccountClick }: LoginPro
       left: 0
     }}>
       {/* HEADER DE PONTA A PONTA */}
-      <header style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '0 40px',
-        height: '70px',
-        backgroundColor: 'rgba(18, 18, 22, 0.8)', 
-        backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid #222226',
-        position: 'sticky',
-        top: 0,
-        zIndex: 1000,
-        width: '100%',
-        boxSizing: 'border-box'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#0070f3' }}></div>
-          <span style={{ fontWeight: 700, fontSize: '18px', letterSpacing: '-0.5px' }}>USDC Digital Bank</span>
-        </div>
-
+      <Header>
         <button 
-          onClick={onCreateAccountClick} // Aciona a mudança de tela no App.tsx
+          onClick={onCreateAccountClick}
           style={{
             padding: '10px 20px',
             backgroundColor: '#ffffff',
@@ -109,18 +91,12 @@ export default function Login({ onLoginSuccess, onCreateAccountClick }: LoginPro
             transition: 'all 0.2s ease',
             boxShadow: '0 4px 12px rgba(255,255,255,0.1)'
           }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.backgroundColor = '#e5e5e5';
-            e.currentTarget.style.transform = 'translateY(-1px)';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.backgroundColor = '#ffffff';
-            e.currentTarget.style.transform = 'translateY(0)';
-          }}
+          onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#e5e5e5'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+          onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.transform = 'translateY(0)'; }}
         >
-          Create Account
+          Criar uma conta
         </button>
-      </header>
+      </Header>
 
       {/* ÁREA CENTRALIZADA DO LOGIN */}
       <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
@@ -133,8 +109,8 @@ export default function Login({ onLoginSuccess, onCreateAccountClick }: LoginPro
           backgroundColor: '#121216', 
           boxShadow: '0 8px 32px rgba(0,0,0,0.4)'
         }}>
-          <h2 style={{ margin: '0 0 10px 0', fontSize: '24px', fontWeight: 600 }}>Sign In</h2>
-          <p style={{ color: '#888893', margin: '0 0 30px 0', fontSize: '14px' }}>Access account test</p>
+          <h2 style={{ margin: '0 0 10px 0', fontSize: '24px', fontWeight: 600 }}>Acessar sua conta</h2>
+          <p style={{ color: '#888893', margin: '0 0 30px 0', fontSize: '14px' }}>** Ambiente de testes **</p>
           
           {error && (
             <div style={{ backgroundColor: 'rgba(255, 77, 79, 0.1)', border: '1px solid rgba(255, 77, 79, 0.2)', color: '#ff4d4f', padding: '12px', borderRadius: '6px', fontSize: '14px', marginBottom: '20px' }}>
@@ -144,7 +120,7 @@ export default function Login({ onLoginSuccess, onCreateAccountClick }: LoginPro
           
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#888893', fontWeight: 500 }}>User</label>
+              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#888893', fontWeight: 500 }}>Número da conta</label>
               <input 
                 type="text" 
                 placeholder="000000"
@@ -158,7 +134,7 @@ export default function Login({ onLoginSuccess, onCreateAccountClick }: LoginPro
             </div>
 
             <div style={{ marginBottom: '30px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#888893', fontWeight: 500 }}>Password</label>
+              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#888893', fontWeight: 500 }}>Senha</label>
               <input 
                 type="password" 
                 placeholder="••••••••"

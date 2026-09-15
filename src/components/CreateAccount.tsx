@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Header from './Header';
 
 interface CreateAccountProps {
   onBackToLogin: () => void;
@@ -49,27 +50,43 @@ export default function CreateAccount({ onBackToLogin }: CreateAccountProps) {
   };
 
   return (
+
     <div style={containerStyle}>
-      <header style={headerStyle}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#0070f3' }}></div>
-          <span style={{ fontWeight: 700, fontSize: '18px' }}>USDC Digital Bank</span>
-        </div>
-        <button onClick={onBackToLogin} style={navButtonStyle}>Back to Sign In</button>
-      </header>
+
+      <Header>
+        <button 
+          onClick={onBackToLogin}
+          style={{
+            padding: '10px 20px',
+            backgroundColor: '#ffffff',
+            color: '#000000',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontWeight: '600',
+            fontSize: '14px',
+            transition: 'all 0.2s ease',
+            boxShadow: '0 4px 12px rgba(255,255,255,0.1)'
+          }}
+          onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#e5e5e5'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+          onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.transform = 'translateY(0)'; }}
+        >
+          Fazer Login
+        </button>
+      </Header>
 
       <div style={contentStyle}>
         <div style={cardStyle}>
-          <h2 style={{ margin: '0 0 10px 0', fontSize: '24px' }}>Create Account</h2>
-          <p style={{ color: '#888893', margin: '0 0 30px 0', fontSize: '14px' }}>Open your new USDC bank account</p>
+          <h2 style={{ margin: '0 0 10px 0', fontSize: '24px' }}>Crie uma conta</h2>
+          <p style={{ color: '#888893', margin: '0 0 30px 0', fontSize: '14px' }}>Abra sua nova conta e descubra a Blockchain</p>
           
           {error && <div style={errorStyle}>{error}</div>}
           {success && <div style={successStyle}>{success}</div>}
           
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: '20px' }}>
-              <label style={labelStyle}>Full Name</label>
-              <input type="text" placeholder="John Doe" value={fullName} onChange={e => setFullName(e.target.value)} required style={inputStyle} onFocus={handleFocus} onBlur={handleBlur} />
+              <label style={labelStyle}>Nome completo</label>
+              <input type="text" placeholder="João Silva" value={fullName} onChange={e => setFullName(e.target.value)} required style={inputStyle} onFocus={handleFocus} onBlur={handleBlur} />
             </div>
 
             <div style={{ marginBottom: '20px' }}>
@@ -78,7 +95,7 @@ export default function CreateAccount({ onBackToLogin }: CreateAccountProps) {
             </div>
 
             <div style={{ marginBottom: '30px' }}>
-              <label style={labelStyle}>Password</label>
+              <label style={labelStyle}>Senha</label>
               <input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required style={inputStyle} onFocus={handleFocus} onBlur={handleBlur} />
             </div>
 
@@ -94,8 +111,6 @@ export default function CreateAccount({ onBackToLogin }: CreateAccountProps) {
 
 // Estilos Compartilhados (Ficou idêntico ao seu modo escuro premium)
 const containerStyle: React.CSSProperties = { fontFamily: '-apple-system, sans-serif', minHeight: '100vh', width: '100vw', backgroundColor: '#0a0a0c', color: '#ffffff', display: 'flex', flexDirection: 'column', position: 'absolute', top: 0, left: 0 };
-const headerStyle: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 40px', height: '70px', backgroundColor: 'rgba(18, 18, 22, 0.8)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #222226', position: 'sticky', top: 0, width: '100%', boxSizing: 'border-box' };
-const navButtonStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#ffffff', color: '#000000', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '600', fontSize: '14px' };
 const contentStyle: React.CSSProperties = { flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' };
 const cardStyle: React.CSSProperties = { width: '100%', maxWidth: '420px', padding: '40px', border: '1px solid #222226', borderRadius: '12px', backgroundColor: '#121216', boxShadow: '0 8px 32px rgba(0,0,0,0.4)' };
 const labelStyle: React.CSSProperties = { display: 'block', marginBottom: '8px', fontSize: '14px', color: '#888893' };
