@@ -46,83 +46,83 @@ export default function AccountStatement({ transactions, currentUserId }: Accoun
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h3 style={{ margin: 0 }}>Extrato da Conta</h3>
+        <h3 style={{ margin: 0 }}>Account Statement</h3>
       </div>
 
       <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end', margin: '15px 0', flexWrap: 'wrap' }}>
         <div>
-          <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '4px' }}>De</label>
+          <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '4px' }}>From</label>
           <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }} />
         </div>
         <div>
-          <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '4px' }}>Até</label>
+          <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '4px' }}>To</label>
           <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }} />
         </div>
         {(startDate || endDate) && (
           <button onClick={clearFilter} style={{ padding: '8px 14px', background: '#eee', border: '1px solid #ccc', borderRadius: '4px', cursor: 'pointer' }}>
-            Limpar filtro
+            Clean filters
           </button>
         )}
       </div>
 
-      <div style={{ border: '1px solid #eee', borderRadius: '8px', overflow: 'hidden' }}>
+      <div style={{ border: '1px solid #b8c1c9', borderRadius: '8px', overflow: 'hidden' }}>
         {displayedTransactions.length === 0 ? (
-          <p style={{ padding: '20px', color: '#666', textAlign: 'center' }}>Nenhuma transação encontrada.</p>
+          <p style={{ padding: '20px', color: '#666', textAlign: 'center' }}>No transactions found.</p>
         ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
-              <tr style={{ backgroundColor: '#f8f9fa', borderBottom: '1px solid #eee' }}>
-                <th style={{ padding: '12px' }}>Tipo / Hash</th>
-                <th style={{ padding: '12px' }}>Valor</th>
-                <th style={{ padding: '12px' }}>Data</th>
+              <tr style={{ backgroundColor: '#b8c1c9', borderBottom: '1px solid #eee' }}>
+                <th style={{ padding: '12px', color: '#525353' }}>Type / Hash</th>
+                <th style={{ padding: '12px', color: '#525353' }}>Amount</th>
+                <th style={{ padding: '12px', color: '#525353' }}>Date</th>
               </tr>
             </thead>
+
             <tbody>
               {displayedTransactions.map(tx => {
                 if (!tx) return null;
-                const isDeposit = tx.type ? tx.type.toLowerCase() : '';
-                const isIncoming = isDeposit === 'deposit' || (isDeposit === 'transfer' && tx.to_account_id === currentUserId);
+
+                const typeLower = tx.type ? tx.type.toLowerCase() : '';
                 const safeAmount = tx.amount ? Number(tx.amount) : 0;
+                const isDeposit = typeLower.startsWith('deposit');
+                const isWithdraw = typeLower.startsWith('withdraw');
+                const isIncoming = isDeposit || (typeLower === 'transfer' && tx.to_account_id === currentUserId);
+                let typeLabel = '';
+                const tokenName = typeLower.includes('eth') ? 'ETH' : 'USDC';
+
+                if (isDeposit) {
+                  typeLabel = `➕ Deposit ${tokenName}`;
+                } else if (isWithdraw) {
+                  typeLabel = `➖ Withdraw ${tokenName}`;
+                } else if (typeLower === 'transfer') {
+                  typeLabel = isIncoming ? '➕ Transfer Received' : '➖ Transfer Sent';
+                } else {
+                  typeLabel = `${isIncoming ? '➕' : '➖'} ${tx.type}`;
+                }
 
                 return (
                   <tr key={tx.id} style={{ borderBottom: '1px solid #eee' }}>
                     <td style={{ padding: '12px' }}>
-                      <div style={{ fontWeight: 'bold', textTransform: 'capitalize' }}>
-                        {isIncoming ? '➕ Depósito' : '➖ Transferência'}
+                      <div style={{ fontWeight: 'bold' }}>
+                        {typeLabel}
                       </div>
                       {tx.tx_hash ? (
                         <div
                           title={tx.tx_hash}
                           onClick={() => copyHash(tx.tx_hash!)}
-                          style={{
-                            fontSize: '11px',
-                            color: copiedHash === tx.tx_hash ? '#2e7d32' : '#999',
-                            fontFamily: 'monospace',
-                            cursor: 'pointer',
-                            fontWeight: copiedHash === tx.tx_hash ? 'bold' : 'normal',
-                            transition: 'color 0.2s'
-                          }}
+                          style={{ fontSize: '12px', color: '#666', cursor: 'pointer', fontFamily: 'monospace', marginTop: '4px' }}
                         >
-                          {copiedHash === tx.tx_hash ? '✅ Hash copiado!' : `${tx.tx_hash.substring(0, 10)}... 📋`}
+                          {copiedHash === tx.tx_hash ? '✅ Hash copiado!' : `${tx.tx_hash.substring(0, 10)}... 📋 Copy Hash transaction`}
                         </div>
                       ) : (
                         <div style={{ fontSize: '11px', color: '#bbb', fontStyle: 'italic' }}>Interna</div>
                       )}
                     </td>
                     <td style={{ padding: '12px', fontWeight: 'bold', color: isIncoming ? '#2e7d32' : '#c62828' }}>
-                      {isIncoming ? '+' : '-'} {safeAmount < 0.01 ? safeAmount.toFixed(6) : safeAmount.toFixed(2)} USDC
+                      {isIncoming ? '+' : '-'} {safeAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })} {tokenName}
                     </td>
-                    <td style={{ padding: '12px', color: '#666', fontSize: '14px' }}>
-                      {tx.created_at ? (() => {
-                        const dateStr = String(tx.created_at).endsWith('Z') || String(tx.created_at).includes('+')
-                          ? tx.created_at
-                          : `${tx.created_at}Z`;
-                        return new Date(dateStr).toLocaleString('pt-BR', {
-                          day: '2-digit', month: '2-digit', year: '2-digit',
-                          hour: '2-digit', minute: '2-digit',
-                          timeZone: 'America/Sao_Paulo'
-                        });
-                      })() : '---'}
+                    <td style={{ padding: '12px', color: '#8d8d8d', fontSize: '14px' }}>
+                      {new Date(tx.created_at).toLocaleDateString('pt-BR')}
                     </td>
                   </tr>
                 );

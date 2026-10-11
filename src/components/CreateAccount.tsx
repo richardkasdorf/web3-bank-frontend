@@ -34,17 +34,17 @@ export default function CreateAccount({ onBackToLogin }: CreateAccountProps) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Erro ao criar a conta.');
+        throw new Error(errorData.detail || 'Error to open a new account.');
       }
 
       setLoading(false);
-      setSuccess('Conta criada com sucesso! Redirecionando...');
+      setSuccess('Account successfully created! Redirecting...');
       setTimeout(() => {
         onBackToLogin();
       }, 2000);
 
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao conectar ao servidor.');
+      setError(err instanceof Error ? err.message : 'Error connecting to the server.');
       setLoading(false);
     }
   };
@@ -71,22 +71,22 @@ export default function CreateAccount({ onBackToLogin }: CreateAccountProps) {
           onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#e5e5e5'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
           onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.transform = 'translateY(0)'; }}
         >
-          Fazer Login
+          Back to login
         </button>
       </Header>
 
       <div style={contentStyle}>
         <div style={cardStyle}>
-          <h2 style={{ margin: '0 0 10px 0', fontSize: '24px' }}>Crie uma conta</h2>
-          <p style={{ color: '#888893', margin: '0 0 30px 0', fontSize: '14px' }}>Abra sua nova conta e descubra a Blockchain</p>
+          <h2 style={{ margin: '0 0 10px 0', fontSize: '24px' }}>Create new account</h2>
+          <p style={{ color: '#888893', margin: '0 0 30px 0', fontSize: '14px' }}>Open an account and explore a world with Blockchain!</p>
           
           {error && <div style={errorStyle}>{error}</div>}
           {success && <div style={successStyle}>{success}</div>}
           
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: '20px' }}>
-              <label style={labelStyle}>Nome completo</label>
-              <input type="text" placeholder="João Silva" value={fullName} onChange={e => setFullName(e.target.value)} required style={inputStyle} onFocus={handleFocus} onBlur={handleBlur} />
+              <label style={labelStyle}>Full name</label>
+              <input type="text" placeholder="Luke Skywalker" value={fullName} onChange={e => setFullName(e.target.value)} required style={inputStyle} onFocus={handleFocus} onBlur={handleBlur} />
             </div>
 
             <div style={{ marginBottom: '20px' }}>
@@ -95,7 +95,7 @@ export default function CreateAccount({ onBackToLogin }: CreateAccountProps) {
             </div>
 
             <div style={{ marginBottom: '30px' }}>
-              <label style={labelStyle}>Senha</label>
+              <label style={labelStyle}>Password</label>
               <input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required style={inputStyle} onFocus={handleFocus} onBlur={handleBlur} />
             </div>
 
@@ -109,7 +109,6 @@ export default function CreateAccount({ onBackToLogin }: CreateAccountProps) {
   );
 }
 
-// Estilos Compartilhados (Ficou idêntico ao seu modo escuro premium)
 const containerStyle: React.CSSProperties = { fontFamily: '-apple-system, sans-serif', minHeight: '100vh', width: '100vw', backgroundColor: '#0a0a0c', color: '#ffffff', display: 'flex', flexDirection: 'column', position: 'absolute', top: 0, left: 0 };
 const contentStyle: React.CSSProperties = { flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' };
 const cardStyle: React.CSSProperties = { width: '100%', maxWidth: '420px', padding: '40px', border: '1px solid #222226', borderRadius: '12px', backgroundColor: '#121216', boxShadow: '0 8px 32px rgba(0,0,0,0.4)' };

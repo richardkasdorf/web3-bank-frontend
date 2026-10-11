@@ -24,7 +24,7 @@ export default function Header({ children }: HeaderProps) {
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#0070f3' }}></div>
-        <span style={{ fontWeight: 700, fontSize: '18px', letterSpacing: '-0.5px' }}>USDC Digital Bank</span>
+        <span style={{ fontWeight: 700, fontSize: '18px', letterSpacing: '-0.5px' }}>WEB3 Bank</span>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>

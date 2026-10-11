@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-export function useTransactionStatus(txId: string, token: string) {
+export function useTransactionStatus(txId: string) {
   const [status, setStatus] = useState<'pending' | 'complete'>('pending');
 
   useEffect(() => {

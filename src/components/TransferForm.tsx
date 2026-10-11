@@ -2,11 +2,10 @@ import React, { useState, useEffect } from 'react';
 import TransferStatusBanner from './TransferStatusBanner';
 
 interface TransferFormProps {
-  token: string;
   onTransferSuccess: () => void; 
 }
 
-export default function TransferForm({ token, onTransferSuccess }: TransferFormProps) {
+export default function TransferForm({ onTransferSuccess }: TransferFormProps) {
   const [destination, setDestination] = useState('');
   const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(false);
@@ -39,12 +38,12 @@ export default function TransferForm({ token, onTransferSuccess }: TransferFormP
     setLoading(true);
     setMessage(null);
 
-    // AJUSTE SEGURO: Substitui vírgula por ponto caso o usuário digite no padrão PT-BR (ex: 0,00005)
+    // REPLACE "," to "."
     const normalizedAmount = amount.replace(',', '.');
     const numericAmount = Number(normalizedAmount);
 
     if (isNaN(numericAmount) || numericAmount <= 0) {
-      setMessage({ type: 'error', text: 'O valor da transferência deve ser maior que zero.' });
+      setMessage({ type: 'error', text: 'The transfer amount must be greater than zero.' });
       setLoading(false);
       return;
     }
@@ -55,9 +54,9 @@ export default function TransferForm({ token, onTransferSuccess }: TransferFormP
       const response = await fetch(`${baseUrl}/transactions/transfer`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           destination: destination.trim(),
           amount: numericAmount, 
@@ -66,7 +65,7 @@ export default function TransferForm({ token, onTransferSuccess }: TransferFormP
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Falha ao realizar transferência.');
+        throw new Error(errorData.detail || 'Transfer failed.');
       }
 
       const data = await response.json();
@@ -76,15 +75,15 @@ export default function TransferForm({ token, onTransferSuccess }: TransferFormP
       setAmount('');
       onTransferSuccess();
     } catch (err: any) {
-      setMessage({ type: 'error', text: err.message || 'Erro ao conectar ao servidor.' });
+      setMessage({ type: 'error', text: err.message || 'Error connecting to the server.' });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ background: '#f8f9fa', padding: '25px', borderRadius: '12px', border: '1px solid #eef0f2', marginBottom: '30px', fontFamily: 'sans-serif' }}>
-      <h3 style={{ margin: '0 0 15px 0', color: '#333' }}>Transferir USDC</h3>
+    <div style={{ background: '#b8c1c9', padding: '25px', borderRadius: '12px', border: '1px solid #eef0f2', marginBottom: '30px', fontFamily: 'sans-serif' }}>
+      <h3 style={{ margin: '0 0 15px 0', color: '#333' }}>Send USDC</h3>
 
       {message && (
         <div style={{ padding: '10px 15px', borderRadius: '6px', marginBottom: '15px', fontSize: '14px', backgroundColor: message.type === 'success' ? '#e8f5e9' : '#ffebee', color: message.type === 'success' ? '#2e7d32' : '#c62828' }}>
@@ -95,17 +94,16 @@ export default function TransferForm({ token, onTransferSuccess }: TransferFormP
       {activeTxId && (
         <TransferStatusBanner
           txId={activeTxId}
-          token={token}
           onFinalized={() => setActiveTxId(null)}
         />
       )}
 
       <form onSubmit={handleTransfer}>
         <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px', color: '#555', fontWeight: 'bold' }}>Destinatário:</label>
+          <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px', color: '#555', fontWeight: 'bold' }}>Destination:</label>
           <input
             type="text"
-            placeholder="Nº da conta (ex: 588306) ou endereço Wallet (0x...)"
+            placeholder="Account number (ex: 588306) or Wallet (0x...)"
             value={destination}
             onChange={e => setDestination(e.target.value)}
             required
@@ -114,7 +112,7 @@ export default function TransferForm({ token, onTransferSuccess }: TransferFormP
         </div>
 
         <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px', color: '#555', fontWeight: 'bold' }}>Valor (USDC):</label>
+          <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px', color: '#555', fontWeight: 'bold' }}>Amount (USDC):</label>
           <input
             type="number"
             step="0.000001"
@@ -131,7 +129,7 @@ export default function TransferForm({ token, onTransferSuccess }: TransferFormP
           disabled={loading}
           style={{ width: '100%', padding: '12px', backgroundColor: loading ? '#9bc5f4' : '#2775CA', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: loading ? 'not-allowed' : 'pointer', transition: 'background 0.2s' }}
         >
-          {loading ? 'Processando transação...' : 'Confirmar Transferência'}
+          {loading ? 'Processing your transaction...' : 'Confirm Transfer'}
         </button>
       </form>
     </div>

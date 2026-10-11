@@ -3,12 +3,11 @@ import { useTransactionStatus } from './hooks/useTransactionStatus';
 
 interface TransferStatusBannerProps {
   txId: string;
-  token: string;
   onFinalized: () => void;
 }
 
-export default function TransferStatusBanner({ txId, token, onFinalized }: TransferStatusBannerProps) {
-  const status = useTransactionStatus(txId, token);
+export default function TransferStatusBanner({ txId, onFinalized }: TransferStatusBannerProps) {
+  const status = useTransactionStatus(txId);
   const isComplete = status === 'complete';
 
   useEffect(() => {
@@ -39,7 +38,7 @@ export default function TransferStatusBanner({ txId, token, onFinalized }: Trans
         boxShadow: isComplete ? 'none' : '0 0 6px #ff4d4d',
         animation: isComplete ? 'none' : 'pulse 1.2s infinite'
       }} />
-      {isComplete ? 'Transação confirmada!' : 'Pendente: Transação em andamento!'}
+      {isComplete ? 'Transaction confirmed!' : 'Pending: Transaction in progress!'}
     </div>
   );
 }

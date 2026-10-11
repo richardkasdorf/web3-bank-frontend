@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from './Header';
 
 interface LoginProps {
-  onLoginSuccess: (token: string) => void;
+  onLoginSuccess: () => void;
   onCreateAccountClick: () => void;
 }
 
@@ -23,7 +23,7 @@ export default function Login({ onLoginSuccess, onCreateAccountClick }: LoginPro
     setError('');
 
     if (isNaN(Number(username.trim()))) {
-      setError('O número da conta deve conter apenas números.');
+      setError('Account must have only numbers.');
       setLoading(false);
       return;
     }
@@ -37,6 +37,7 @@ export default function Login({ onLoginSuccess, onCreateAccountClick }: LoginPro
           'Content-Type': 'application/x-www-form-urlencoded',
           'ngrok-skip-browser-warning': 'true'
         },
+        credentials: 'include',
         body: new URLSearchParams({ 
           username: username.trim(), 
           password: password 
@@ -45,12 +46,11 @@ export default function Login({ onLoginSuccess, onCreateAccountClick }: LoginPro
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Número de conta ou senha incorretos.');
+        throw new Error(errorData.detail || 'Account or password incorrect.');
       }
 
-      const data = await response.json();
-      localStorage.setItem('token', data.access_token);
-      onLoginSuccess(data.access_token);
+      onLoginSuccess();
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao conectar ao servidor.');
       setLoading(false);
@@ -75,7 +75,7 @@ export default function Login({ onLoginSuccess, onCreateAccountClick }: LoginPro
       top: 0,
       left: 0
     }}>
-      {/* HEADER DE PONTA A PONTA */}
+      {/* HEADER */}
       <Header>
         <button 
           onClick={onCreateAccountClick}
@@ -94,11 +94,11 @@ export default function Login({ onLoginSuccess, onCreateAccountClick }: LoginPro
           onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#e5e5e5'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
           onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.transform = 'translateY(0)'; }}
         >
-          Criar uma conta
+          Create Account
         </button>
       </Header>
 
-      {/* ÁREA CENTRALIZADA DO LOGIN */}
+      {/* LOGIN CENTER AREA*/}
       <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
         <div style={{ 
           width: '100%',
@@ -109,8 +109,8 @@ export default function Login({ onLoginSuccess, onCreateAccountClick }: LoginPro
           backgroundColor: '#121216', 
           boxShadow: '0 8px 32px rgba(0,0,0,0.4)'
         }}>
-          <h2 style={{ margin: '0 0 10px 0', fontSize: '24px', fontWeight: 600 }}>Acessar sua conta</h2>
-          <p style={{ color: '#888893', margin: '0 0 30px 0', fontSize: '14px' }}>** Ambiente de testes **</p>
+          <h2 style={{ margin: '0 0 10px 0', fontSize: '24px', fontWeight: 600 }}>Login information</h2>
+          <p style={{ color: '#888893', margin: '0 0 30px 0', fontSize: '14px' }}>** Test environment **</p>
           
           {error && (
             <div style={{ backgroundColor: 'rgba(255, 77, 79, 0.1)', border: '1px solid rgba(255, 77, 79, 0.2)', color: '#ff4d4f', padding: '12px', borderRadius: '6px', fontSize: '14px', marginBottom: '20px' }}>
@@ -120,7 +120,7 @@ export default function Login({ onLoginSuccess, onCreateAccountClick }: LoginPro
           
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#888893', fontWeight: 500 }}>Número da conta</label>
+              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#888893', fontWeight: 500 }}>Account number</label>
               <input 
                 type="text" 
                 placeholder="000000"
@@ -134,7 +134,7 @@ export default function Login({ onLoginSuccess, onCreateAccountClick }: LoginPro
             </div>
 
             <div style={{ marginBottom: '30px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#888893', fontWeight: 500 }}>Senha</label>
+              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#888893', fontWeight: 500 }}>Password</label>
               <input 
                 type="password" 
                 placeholder="••••••••"
@@ -165,7 +165,7 @@ export default function Login({ onLoginSuccess, onCreateAccountClick }: LoginPro
               onMouseOver={(e) => { if(!loading) e.currentTarget.style.backgroundColor = '#1a85ff'; }}
               onMouseOut={(e) => { if(!loading) e.currentTarget.style.backgroundColor = '#0070f3'; }}
             >
-              {loading ? 'Autenticando...' : 'Entrar'}
+              {loading ? 'Authenticating...' : 'Login'}
             </button>
           </form>
         </div>

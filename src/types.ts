@@ -21,6 +21,7 @@ export interface UserBalance {
   id: number;
   user_id: number;
   balance: string | number; 
+  eth_balance: string | number; 
   wallet_address: string;    
   blockchain: string;        
   account_type: string;
