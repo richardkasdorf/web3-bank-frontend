@@ -27,11 +27,9 @@ export default function Dashboard({ onLogout }: DashboardProps) {
 
   const fetchData = async () => {
     try {
-      const headers = { 'ngrok-skip-browser-warning': 'true' };
       const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
       const resBalance = await fetch(`${baseUrl}/accounts/balance`, { 
-        headers,
         credentials: 'include' 
       });
       if (resBalance.status === 401) { handleSessionExpired(); return; }
@@ -43,7 +41,6 @@ export default function Dashboard({ onLogout }: DashboardProps) {
       await new Promise(resolve => setTimeout(resolve, 50));
 
       const resTx = await fetch(`${baseUrl}/accounts/statement`, { 
-        headers,
         credentials: 'include' 
       });
       if (!resTx.ok) throw new Error(`Erro ao buscar extrato: ${resTx.status}`);
