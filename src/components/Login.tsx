@@ -18,46 +18,46 @@ export default function Login({ onLoginSuccess, onCreateAccountClick }: LoginPro
   }, []);
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+  e.preventDefault();
+  setLoading(true);
+  setError('');
 
-    if (isNaN(Number(username.trim()))) {
-      setError('Account must have only numbers.');
-      setLoading(false);
-      return;
-    }
+  if (!/^\d+$/.test(username.trim())) {
+    setError('Account must have only numbers.');
+    setLoading(false);
+    return;
+  }
 
-    try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-      
-      const response = await fetch(`${apiUrl}/token`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'ngrok-skip-browser-warning': 'true'
-        },
-        credentials: 'include',
-        body: new URLSearchParams({ 
-          username: username.trim(), 
-          password: password 
-        }),
-      });
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-      if (!response.ok) {
+    const response = await fetch(`${apiUrl}/token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      credentials: 'include',
+      body: new URLSearchParams({
+        username: username.trim(),
+        password: password,
+      }),
+    });
+
+    if (!response.ok) {
+      let detail = 'Account or password incorrect.';
+      try {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Account or password incorrect.');
+        if (typeof errorData.detail === 'string') detail = errorData.detail;
+      } catch {
       }
-
-      onLoginSuccess();
-
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao conectar ao servidor.');
-      setLoading(false);
-    } finally {
-      setLoading(false);
+      throw new Error(detail);
     }
-  };
+
+    onLoginSuccess();
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'Erro ao conectar ao servidor.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div style={{ 
